@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, TextInput, Button, Text, StyleSheet } from 'react-native';
 import { signUp, signIn, signOut } from '../services/authService';
 
-const AuthScreen = () => {
+const AuthScreen = ({ navigation }) => {  // Destructure navigation prop
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [user, setUser] = useState(null);
@@ -13,6 +13,7 @@ const AuthScreen = () => {
             const newUser = await signUp(email, password);
             setUser(newUser);
             setError(null);
+            navigation.navigate('Home'); // Navigate to Home after sign up
         } catch (err) {
             setError(err.message);
         }
@@ -23,6 +24,7 @@ const AuthScreen = () => {
             const loggedInUser = await signIn(email, password);
             setUser(loggedInUser);
             setError(null);
+            navigation.navigate('Home'); // Navigate to Home after sign in
         } catch (err) {
             setError(err.message);
         }
@@ -31,6 +33,7 @@ const AuthScreen = () => {
     const handleSignOut = async () => {
         await signOut();
         setUser(null);
+        navigation.navigate('Auth'); // Navigate to Auth screen after sign out
     };
 
     return (
