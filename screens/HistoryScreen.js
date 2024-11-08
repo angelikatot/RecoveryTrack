@@ -1,63 +1,16 @@
-import React, { useEffect, useState } from 'react';
+// HistoryScreen.js
+import React from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
-import { getDatabase, ref, query, orderByChild, get } from 'firebase/database';
-import { getAuth } from 'firebase/auth';
-import app from '../services/firebaseConfig';
+import { useHistoryData } from '../components/DataFetching';
+import HistoryChart from '../components/HistoryChart';
 
 export default function HistoryScreen() {
-    const [history, setHistory] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const auth = getAuth();
-                const user = auth.currentUser;
-
-                if (!user) {
-                    setError('User not authenticated.');
-                    setLoading(false);
-                    return;
-                }
-
-                const database = getDatabase(app);
-                // Reference to the specific user's data
-                const userRecordsRef = ref(database, `dailyRecords/${user.uid}`);
-
-                // Get the data once instead of using onValue
-                const snapshot = await get(userRecordsRef);
-
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    const historyArray = Object.entries(data).map(([key, value]) => ({
-                        id: key,
-                        ...value,
-                    }))
-                        // Sort by date, most recent first
-                        .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-                    setHistory(historyArray);
-                } else {
-                    setHistory([]);
-                    setError('No vitals data available.');
-                }
-            } catch (err) {
-                console.error('Error fetching data:', err);
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
-    }, []);
+    const { history, loading, error } = useHistoryData();
 
     const renderItem = ({ item }) => {
         const symptoms = item.symptoms || {};
         const vitals = item.vitals || {};
 
-        // Parse the ISO date string
         const date = new Date(item.date);
         const formattedDate = date instanceof Date && !isNaN(date)
             ? date.toLocaleDateString() + ' ' + date.toLocaleTimeString()
@@ -99,13 +52,12 @@ export default function HistoryScreen() {
     return (
         <View style={styles.container}>
             <Text style={styles.headerText}>History of Recorded Data</Text>
+            <HistoryChart data={history} />
             <FlatList
                 data={history}
                 keyExtractor={(item) => item.id}
                 renderItem={renderItem}
-                ListEmptyComponent={
-                    <Text style={styles.emptyText}>No records found</Text>
-                }
+                ListEmptyComponent={<Text style={styles.emptyText}>No records found</Text>}
             />
         </View>
     );
