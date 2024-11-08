@@ -12,6 +12,7 @@ export default function InputScreen({ navigation }) {
 
     // Function to handle saving vitals data
     const handleSaveVitals = () => {
+        console.log(navigation);
         const auth = getAuth();
         const user = auth.currentUser;
 
@@ -49,7 +50,7 @@ export default function InputScreen({ navigation }) {
                 .then(() => {
 
                     alert('Data saved successfully!');
-                    navigation.navigate('History');
+                    navigation.navigate('HistoryScreen');
                 })
                 .catch((error) => {
                     console.error('Error saving data: ', error);

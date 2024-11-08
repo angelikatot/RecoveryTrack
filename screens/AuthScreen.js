@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, TextInput, Button, Text, StyleSheet } from 'react-native';
 import { signUp, signIn, signOut } from '../services/authService';
 
-const AuthScreen = ({ navigation }) => {  // Destructure navigation prop
+const AuthScreen = ({ navigation }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [user, setUser] = useState(null);
@@ -13,22 +13,31 @@ const AuthScreen = ({ navigation }) => {  // Destructure navigation prop
             const newUser = await signUp(email, password);
             setUser(newUser);
             setError(null);
-            navigation.navigate('Home'); // Navigate to Home after sign up
+            navigation.navigate('Home');
         } catch (err) {
-            setError(err.message);
+            if (err.message.includes("email-already-in-use")) {
+                setError("User already exists");
+            } else {
+                setError(err.message);
+            }
         }
     };
+
 
     const handleSignIn = async () => {
         try {
             const loggedInUser = await signIn(email, password);
             setUser(loggedInUser);
             setError(null);
-            navigation.navigate('Home'); // Navigate to Home after sign in
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'App' }]  // Reset to the App stack screen name
+            });
         } catch (err) {
             setError(err.message);
         }
     };
+
 
     const handleSignOut = async () => {
         await signOut();
@@ -74,8 +83,8 @@ const AuthScreen = ({ navigation }) => {  // Destructure navigation prop
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',  // Centers vertically
-        alignItems: 'center',       // Centers horizontally
+        justifyContent: 'center',
+        alignItems: 'center',
         padding: 20,
     },
     authContainer: {
