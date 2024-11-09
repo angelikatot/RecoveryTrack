@@ -1,17 +1,20 @@
-// DataFetching.js
+// DataFetching hakee käyttäjän History-n data Firebase-tietokannasta.
+// Custom hook (useHistoryData) on luotu, jotta datan hakulogiikka on erillään käyttöliittymästä 
+
 import { useEffect, useState } from 'react';
 import { getDatabase, ref, get } from 'firebase/database';
 import { getAuth } from 'firebase/auth';
 import app from '../services/firebaseConfig';
 
 export const useHistoryData = () => {
-    const [history, setHistory] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [history, setHistory] = useState([]); // datan talletusta varten
+    const [loading, setLoading] = useState(true); //loading tila
+    const [error, setError] = useState(null); //virheen käsittely
 
     useEffect(() => {
         const fetchData = async () => {
             try {
+                //tarkistetaan käyttäjää authentication avulla
                 const auth = getAuth();
                 const user = auth.currentUser;
 
@@ -20,7 +23,7 @@ export const useHistoryData = () => {
                     setLoading(false);
                     return;
                 }
-
+                //yhtistys tietokantaan ja datan haku
                 const database = getDatabase(app);
                 const userRecordsRef = ref(database, `dailyRecords/${user.uid}`);
                 const snapshot = await get(userRecordsRef);
@@ -42,7 +45,7 @@ export const useHistoryData = () => {
                 console.error('Error fetching data:', err);
                 setError(err.message);
             } finally {
-                setLoading(false);
+                setLoading(false); //lopetetaan loading
             }
         };
 
@@ -51,3 +54,7 @@ export const useHistoryData = () => {
 
     return { history, loading, error };
 };
+
+
+//https://stackoverflow.com/questions/70195149/react-custom-hook-to-set-user-with-firebase
+//https://firebase.google.com/docs/database/admin/retrieve-data

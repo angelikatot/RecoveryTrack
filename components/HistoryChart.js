@@ -1,4 +1,4 @@
-// HistoryChart.js
+// HistoryChart kaavio näyttää vitaalit (mm. lämpötila) kaavioina. toimii historyscreenin ja datafetchinging kanssa yhteistyössä
 import React from 'react';
 import { LineChart } from 'react-native-chart-kit';
 import { Dimensions, View, Text } from 'react-native';
@@ -6,13 +6,13 @@ import { Dimensions, View, Text } from 'react-native';
 const { width } = Dimensions.get('window');
 
 const HistoryChart = ({ data }) => {
-    // Prepare chart data
+    //kaavio datan muodossa, joka sopii LineChart-komponentille
     const chartData = {
-        labels: data.map(item => new Date(item.date).toLocaleDateString()),
+        labels: data.map(item => new Date(item.date).toLocaleDateString()), //päivämäärä
         datasets: [
             {
-                data: data.map(item => item.vitals.temperature || 0), // Plot temperature
-                strokeWidth: 2,
+                data: data.map(item => item.vitals.temperature || 0), //  temperature
+                strokeWidth: 2, //chart tyylittely
             },
         ],
     };
@@ -49,4 +49,6 @@ const HistoryChart = ({ data }) => {
     );
 };
 
-export default HistoryChart;
+export default HistoryChart; //komponentti exportoidaan että  voidaan käyttää HistoryScreenissä
+
+//https://github.com/indiespirit/react-native-chart-kit

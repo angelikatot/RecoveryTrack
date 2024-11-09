@@ -29,7 +29,7 @@ export default function InputScreen({ navigation }) {
             const userId = user.uid; //  user's unique ID
             const database = getDatabase(app);
 
-            // Use a timestamp for the path (milliseconds since epoch)
+            // Use a timestamp for the path 
             const timestamp = Date.now();  // This will provide a unique key based on the current time
 
             // Create a new record for daily vitals and symptoms using timestamp as the path

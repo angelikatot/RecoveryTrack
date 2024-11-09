@@ -1,12 +1,13 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
+import logo from '../assets/logo.png'
 
 export default function HomeScreen() {
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Welcome to Your Symptom Tracker</Text>
+            <Text style={styles.title}>Welcome to RecoveryTrack</Text>
             <Image
-                source={{ uri: 'https://via.placeholder.com/300x200.png?text=Symptom+Tracker' }}  // Replace with your image URL or local image
+                source={logo}  // logo kuva
                 style={styles.image}
             />
             <Text style={styles.description}>

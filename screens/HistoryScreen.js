@@ -1,8 +1,12 @@
-// HistoryScreen.js
+// HistoryScreen näyttö, joka näyttää käyttäjän tallentamia oireita. 
+// käyttää useHistoryData-hookia ja HistoryChart-komponenttia tiedon hakemiseen ja visualisointiin.
+
+
+
 import React from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
-import { useHistoryData } from '../components/DataFetching';
-import HistoryChart from '../components/HistoryChart';
+import { useHistoryData } from '../components/DataFetching';  //datan hakeminen
+import HistoryChart from '../components/HistoryChart'; //visualisointia varten
 
 export default function HistoryScreen() {
     const { history, loading, error } = useHistoryData();
@@ -11,7 +15,7 @@ export default function HistoryScreen() {
         const symptoms = item.symptoms || {};
         const vitals = item.vitals || {};
 
-        const date = new Date(item.date);
+        const date = new Date(item.date);  //päivämäärä
         const formattedDate = date instanceof Date && !isNaN(date)
             ? date.toLocaleDateString() + ' ' + date.toLocaleTimeString()
             : 'Invalid date';
@@ -51,12 +55,12 @@ export default function HistoryScreen() {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.headerText}>History of Recorded Data</Text>
+            <Text style={styles.headerText}>History</Text>
             <HistoryChart data={history} />
             <FlatList
-                data={history}
+                data={history} // FlatList näyttää historian dataa listana
                 keyExtractor={(item) => item.id}
-                renderItem={renderItem}
+                renderItem={renderItem} // Kutsuu renderItem-funktion jokaiselle dataerälle
                 ListEmptyComponent={<Text style={styles.emptyText}>No records found</Text>}
             />
         </View>
@@ -113,3 +117,6 @@ const styles = StyleSheet.create({
         color: '#666',
     },
 });
+
+
+//https://reactnative.dev/docs/flatlist
