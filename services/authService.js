@@ -2,10 +2,10 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut as 
 import { getDatabase, ref, set, get, child } from 'firebase/database';
 import { auth } from './firebaseConfig';
 
-// Firebase instance
+// Firebase database
 const db = getDatabase();
 
-// Function to sign up a new user
+//  sign up a new user
 export const signUp = async (email, password) => {
     try {
         await createUserWithEmailAndPassword(auth, email, password);
@@ -14,7 +14,7 @@ export const signUp = async (email, password) => {
     }
 };
 
-// Function to sign in an existing user
+// sign in existing user
 export const signIn = async (email, password) => {
     try {
         await signInWithEmailAndPassword(auth, email, password);
@@ -23,10 +23,10 @@ export const signIn = async (email, password) => {
     }
 };
 
-// Sign-out function
+// Sign-out 
 export const signOut = async () => {
     try {
-        await firebaseSignOut(auth); // Corrected sign-out function
+        await firebaseSignOut(auth);
     } catch (error) {
         console.error("Error signing out:", error.message);
         throw error;

@@ -5,8 +5,8 @@
 
 import React from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
-import { useHistoryData } from '../components/DataFetching';  //datan hakeminen
-import HistoryChart from '../components/HistoryChart'; //visualisointia varten
+import { useHistoryData } from '../components/DataFetching';
+import HistoryChart from '../components/HistoryChart';
 
 export default function HistoryScreen() {
     const { history, loading, error } = useHistoryData();
@@ -15,7 +15,7 @@ export default function HistoryScreen() {
         const symptoms = item.symptoms || {};
         const vitals = item.vitals || {};
 
-        const date = new Date(item.date);  //päivämäärä
+        const date = new Date(item.date);
         const formattedDate = date instanceof Date && !isNaN(date)
             ? date.toLocaleDateString() + ' ' + date.toLocaleTimeString()
             : 'Invalid date';
@@ -23,15 +23,22 @@ export default function HistoryScreen() {
         return (
             <View style={styles.record}>
                 <Text style={styles.dateText}>Date: {formattedDate}</Text>
+
                 <View style={styles.dataSection}>
                     <Text style={styles.sectionTitle}>Symptoms:</Text>
-                    <Text>Pain: {symptoms.pain || 'No data'}</Text>
-                    <Text>Fatigue: {symptoms.fatigue || 'No data'}</Text>
+                    <Text>Pain: {symptoms.pain ?? 'No data'}</Text>
+                    <Text>Fatigue: {symptoms.fatigue ?? 'No data'}</Text>
+                    <Text>Mood: {symptoms.mood ?? 'No data'}</Text>
                 </View>
+
                 <View style={styles.dataSection}>
                     <Text style={styles.sectionTitle}>Vitals:</Text>
                     <Text>Temperature: {vitals.temperature ? `${vitals.temperature}°C` : 'No data'}</Text>
                     <Text>Blood Pressure: {vitals.bloodPressure || 'No data'}</Text>
+                    <Text>Heart Rate: {vitals.heartRate ? `${vitals.heartRate} bpm` : 'No data'}</Text>
+                    <Text>Weight: {vitals.weight ? `${vitals.weight} kg` : 'No data'}</Text>
+                    <Text>Oxygen Saturation: {vitals.oxygenSaturation ? `${vitals.oxygenSaturation}%` : 'No data'}</Text>
+                    <Text>Wound Healing: {vitals.woundHealing || 'No data'}</Text>
                 </View>
             </View>
         );
@@ -56,13 +63,25 @@ export default function HistoryScreen() {
     return (
         <View style={styles.container}>
             <Text style={styles.headerText}>History</Text>
-            <HistoryChart data={history} />
-            <FlatList
-                data={history} // FlatList näyttää historian dataa listana
-                keyExtractor={(item) => item.id}
-                renderItem={renderItem} // Kutsuu renderItem-funktion jokaiselle dataerälle
-                ListEmptyComponent={<Text style={styles.emptyText}>No records found</Text>}
-            />
+            {history.length > 0 ? (
+                <>
+                    <HistoryChart data={history} />
+                    <FlatList
+                        data={history}
+                        keyExtractor={(item, index) => item.id || index.toString()}
+                        renderItem={renderItem}
+                        ListEmptyComponent={
+                            <View style={styles.emptyContainer}>
+                                <Text style={styles.emptyText}>No records found</Text>
+                            </View>
+                        }
+                    />
+                </>
+            ) : (
+                <View style={styles.emptyContainer}>
+                    <Text style={styles.emptyText}>No records found</Text>
+                </View>
+            )}
         </View>
     );
 }
@@ -83,6 +102,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 20,
     },
+
     record: {
         padding: 15,
         marginVertical: 8,
@@ -117,6 +137,5 @@ const styles = StyleSheet.create({
         color: '#666',
     },
 });
-
 
 //https://reactnative.dev/docs/flatlist
