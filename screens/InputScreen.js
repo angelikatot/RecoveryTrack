@@ -310,3 +310,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
 });
+
+
+// https://www.npmjs.com/package/@react-native-community/slider  Slider

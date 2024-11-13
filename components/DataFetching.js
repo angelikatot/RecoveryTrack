@@ -1,19 +1,21 @@
 // DataFetching hakee käyttäjän History-n data Firebase-tietokannasta.
 // Custom hook (useHistoryData) on luotu, jotta datan hakulogiikka on erillään käyttöliittymästä 
+// DataFetching fetches the user's "History" data from the Firebase database.
+// A custom hook (useHistoryData) is created to separate data-fetching logic from the UI
+
 import { useEffect, useState } from 'react';
 import { getDatabase, ref, get } from 'firebase/database';
 import { getAuth } from 'firebase/auth';
 import app from '../services/firebaseConfig';
 
 export const useHistoryData = () => {
-    const [history, setHistory] = useState([]); // datan talletusta varten
-    const [loading, setLoading] = useState(true); //loading tila
-    const [error, setError] = useState(null); //virheen käsittely
+    const [history, setHistory] = useState([]); // For storing fetched data
+    const [loading, setLoading] = useState(true); // Loading state
+    const [error, setError] = useState(null); // Error handling
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                //tarkistetaan käyttäjää authentication avulla
                 const auth = getAuth();
                 const user = auth.currentUser;
 
@@ -23,7 +25,6 @@ export const useHistoryData = () => {
                     return;
                 }
 
-                //yhtistys tietokantaan ja datan haku
                 const database = getDatabase(app);
                 const userRecordsRef = ref(database, `dailyRecords/${user.uid}`);
                 const snapshot = await get(userRecordsRef);
@@ -32,13 +33,11 @@ export const useHistoryData = () => {
                     const data = snapshot.val();
                     const historyArray = Object.entries(data)
                         .map(([key, value]) => {
-                            // Varmistetaan, että kaikki numeeriset arvot käsitellään oikein
                             const parseNumericValue = (val) => {
                                 const parsed = parseFloat(val);
                                 return !isNaN(parsed) ? parsed : 0;
                             };
 
-                            // Turvallisesti haetaan vitals- ja symptoms-data
                             const vitals = value.vitals || {};
                             const symptoms = value.symptoms || {};
 
@@ -60,10 +59,7 @@ export const useHistoryData = () => {
                                 }
                             };
                         })
-                        .filter(item => {
-                            // Poistetaan kaikki tietueet, joilla on virheellinen päivämäärä
-                            return !isNaN(new Date(item.date).getTime());
-                        })
+                        .filter(item => !isNaN(new Date(item.date).getTime()))
                         .sort((a, b) => new Date(b.date) - new Date(a.date));
 
                     setHistory(historyArray);
@@ -74,18 +70,30 @@ export const useHistoryData = () => {
                 console.error('Error fetching data:', err);
                 setError(err.message);
             } finally {
-                setLoading(false); //lopetetaan loading
+                setLoading(false); // End loading
             }
         };
 
         fetchData();
     }, []);
 
+    // New function to retrieve vitals by date
+    const getVitalsByDate = (selectedDate) => {
+        // Extract the date part (YYYY-MM-DD) from the Firestore timestamp
+        const formattedSelectedDate = selectedDate.split('T')[0]; // e.g., '2024-11-11'
+
+        // Find the record that matches the selected date
+        const record = history.find(item => item.date.split('T')[0] === formattedSelectedDate);
+
+        return record || null;
+    };
+
+
     return {
         history,
         loading,
         error,
-        // Lisää apufunktio tarkistamaan, onko data kelvollista visualisointia varten
+        getVitalsByDate, // Return this function as part of the hook
         getValidChartData: () => history.filter(item =>
             Object.values(item.vitals).some(val =>
                 typeof val === 'number' && !isNaN(val)
@@ -93,6 +101,11 @@ export const useHistoryData = () => {
         )
     };
 };
+
+
+// Links for additional Firebase resources and references
+
+
 
 //https://stackoverflow.com/questions/70195149/react-custom-hook-to-set-user-with-firebase
 //https://firebase.google.com/docs/database/admin/retrieve-data
