@@ -1,85 +1,62 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, Text, StyleSheet } from 'react-native';
-import { signUp, signIn, signOut } from '../services/authService';
+import { View, TextInput, Button, Text, StyleSheet, Alert } from 'react-native';
+import { signUp, signIn } from '../services/authService';
+
 
 const AuthScreen = ({ navigation }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [user, setUser] = useState(null);
     const [error, setError] = useState(null);
 
     const handleSignUp = async () => {
         try {
-            const newUser = await signUp(email, password);
-            setUser(newUser);
-            setError(null);
-            navigation.navigate('Home');
-        } catch (err) {
-            if (err.message.includes("email-already-in-use")) {
-                setError("User already exists");
-            } else {
-                setError(err.message);
-            }
+            await signUp(email, password);
+            Alert.alert('Success', 'Account created successfully');
+        } catch (error) {
+            console.error('Sign Up Error:', error);
+            Alert.alert('Sign Up Error', error.message);
+            setError(error.message);
         }
     };
-
 
     const handleSignIn = async () => {
         try {
-            const loggedInUser = await signIn(email, password);
-            setUser(loggedInUser);
-            setError(null);
-            navigation.reset({
-                index: 0,
-                routes: [{ name: 'App' }]  // Reset to the App stack screen name
-            });
-        } catch (err) {
-            setError(err.message);
+            await signIn(email, password);
+
+        } catch (error) {
+            console.error('Sign In Error:', error);
+            Alert.alert('Sign In Error', error.message);
+            setError(error.message);
         }
-    };
-
-
-    const handleSignOut = async () => {
-        await signOut();
-        setUser(null);
-        navigation.navigate('Auth'); // Navigate to Auth screen after sign out
     };
 
     return (
         <View style={styles.container}>
-            {user ? (
-                <View>
-                    <Text>Welcome, {user.email}</Text>
-                    <Button title="Sign Out" onPress={handleSignOut} />
-                </View>
-            ) : (
-                <View style={styles.authContainer}>
-                    <Text style={styles.title}>Sign In</Text>
-                    <TextInput
-                        placeholder="Email"
-                        value={email}
-                        onChangeText={setEmail}
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                        style={styles.input}
-                    />
-                    <TextInput
-                        placeholder="Password"
-                        value={password}
-                        onChangeText={setPassword}
-                        secureTextEntry
-                        style={styles.input}
-                    />
-                    <Button title="Sign Up" onPress={handleSignUp} />
-                    <View style={styles.spacer} />
-                    <Button title="Sign In" onPress={handleSignIn} color="green" />
-                    {error && <Text style={styles.error}>{error}</Text>}
-                </View>
-            )}
+            <View style={styles.authContainer}>
+                <Text style={styles.title}>Sign In</Text>
+                <TextInput
+                    placeholder="Email"
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    style={styles.input}
+                />
+                <TextInput
+                    placeholder="Password"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry
+                    style={styles.input}
+                />
+                <Button title="Sign Up" onPress={handleSignUp} />
+                <View style={styles.spacer} />
+                <Button title="Sign In" onPress={handleSignIn} color="green" />
+                {error && <Text style={styles.error}>{error}</Text>}
+            </View>
         </View>
     );
 };
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,

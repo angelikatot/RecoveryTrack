@@ -8,18 +8,22 @@ const db = getDatabase();
 //  sign up a new user
 export const signUp = async (email, password) => {
     try {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        return userCredential.user;
     } catch (error) {
         console.error("Error signing up:", error.message);
+        throw error; // Rethrow to allow caller to handle the error
     }
 };
 
 // sign in existing user
 export const signIn = async (email, password) => {
     try {
-        await signInWithEmailAndPassword(auth, email, password);
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        return userCredential.user;
     } catch (error) {
         console.error("Error signing in:", error.message);
+        throw error; // Rethrow to allow caller to handle the error
     }
 };
 

@@ -2,20 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Pressable } from 'react-native';
 import InputScreen from './screens/InputScreen';
 import HistoryScreen from './screens/HistoryScreen';
 import HomeScreen from './screens/HomeScreen';
 import CalendarScreen from './screens/CalendarScreen';
 import DailyVitalsScreen from './screens/DailyVitalsScreen';
 import ProfileScreen from './screens/ProfileScreen';
-
+import ProfileDetailsScreen from './screens/ProfileDetailsScreen';
 import AuthScreen from './screens/AuthScreen';
 import { auth } from './services/firebaseConfig';
 import Ionicons from '@expo/vector-icons/Ionicons';
-
 import { useRoute } from '@react-navigation/native';
-
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -24,8 +21,14 @@ export default function App() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((authenticatedUser) => {
-      setUser(authenticatedUser);
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      if (currentUser) {
+        console.log('Current authenticated user:', currentUser.uid);
+        setUser(currentUser);
+      } else {
+        console.log('No user is authenticated');
+        setUser(null);
+      }
     });
     return unsubscribe;
   }, []);
@@ -56,6 +59,11 @@ export default function App() {
               component={DailyVitalsScreen}
               options={{ title: 'Daily Vitals' }}
             />
+            <Stack.Screen
+              name="ProfileDetailsScreen"
+              component={ProfileDetailsScreen}
+              options={{ title: 'Edit Profile' }}
+            />
           </>
         ) : (
           <Stack.Screen
@@ -68,8 +76,6 @@ export default function App() {
     </NavigationContainer>
   );
 }
-
-
 
 function AppScreens() {
   const route = useRoute();
@@ -94,10 +100,12 @@ function AppScreens() {
       <Tab.Screen name="InputScreen" component={InputScreen} options={{ title: 'Input' }} />
       <Tab.Screen name="HistoryScreen" component={HistoryScreen} options={{ title: 'History' }} />
       <Tab.Screen name="CalendarScreen" component={CalendarScreen} options={{ title: 'Calendar' }} />
-      <Tab.Screen name="ProfileScreen" component={ProfileScreen} options={{ title: 'Profile' }} />
+      <Tab.Screen
+        name="ProfileScreen"
+        component={ProfileScreen}
+        options={{ title: 'Profile' }}
+        initialParams={{ handleSignOut }}
+      />
     </Tab.Navigator>
   );
 }
-
-
-
