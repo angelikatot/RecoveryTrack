@@ -12,7 +12,8 @@ export default function InputScreen({ navigation }) {
     const [fatigue, setFatigue] = useState(0);
     const [mood, setMood] = useState(0);
     const [temperature, setTemperature] = useState('');
-    const [bloodPressure, setBloodPressure] = useState('');
+    const [systolic, setSystolic] = useState('');
+    const [diastolic, setDiastolic] = useState('');
     const [heartRate, setHeartRate] = useState('');
     const [oxygenSaturation, setOxygenSaturation] = useState('');
     const [weight, setWeight] = useState('');
@@ -60,11 +61,13 @@ export default function InputScreen({ navigation }) {
         }
 
         // Blood pressure validation
-        if (bloodPressure) {
-            const bpPattern = /^\d{2,3}\/\d{2,3}$/;
-            if (!bpPattern.test(bloodPressure)) {
-                errors.push('Blood pressure should be in format "120/80"');
-            }
+        const sys = parseInt(systolic);
+        const dia = parseInt(diastolic);
+        if (systolic && (isNaN(sys) || sys < 70 || sys > 250)) {
+            errors.push('Systolic pressure should be between 70 and 250 mmHg');
+        }
+        if (diastolic && (isNaN(dia) || dia < 40 || dia > 150)) {
+            errors.push('Diastolic pressure should be between 40 and 150 mmHg');
         }
 
         return errors;
@@ -106,7 +109,8 @@ export default function InputScreen({ navigation }) {
                     },
                     vitals: {
                         temperature: temperature ? parseFloat(temperature.replace(',', '.')) : null,
-                        bloodPressure: bloodPressure || null,
+                        systolic: systolic ? parseInt(systolic) : null,
+                        diastolic: diastolic ? parseInt(diastolic) : null,
                         heartRate: heartRate ? parseInt(heartRate) : null,
                         oxygenSaturation: oxygenSaturation ? parseInt(oxygenSaturation) : null,
                         weight: weight ? parseFloat(weight) : null,
@@ -114,7 +118,7 @@ export default function InputScreen({ navigation }) {
                         woundImage: woundImageUrl,
                     },
                 };
-
+                console.log(data);
                 await set(recordRef, data);
                 Alert.alert('Success', 'Data saved successfully!');
                 navigation.navigate('HistoryScreen');
@@ -141,12 +145,22 @@ export default function InputScreen({ navigation }) {
                     placeholder="36.5"
                 />
 
-                <Text style={styles.label}>Blood Pressure (mmHg):</Text>
+                <Text style={styles.label}>Systolic Pressure (mmHg):</Text>
                 <TextInput
                     style={styles.input}
-                    value={bloodPressure}
-                    onChangeText={setBloodPressure}
-                    placeholder="120/80"
+                    value={systolic}
+                    onChangeText={setSystolic}
+                    keyboardType="numeric"
+                    placeholder="120"
+                />
+
+                <Text style={styles.label}>Diastolic Pressure (mmHg):</Text>
+                <TextInput
+                    style={styles.input}
+                    value={diastolic}
+                    onChangeText={setDiastolic}
+                    keyboardType="numeric"
+                    placeholder="80"
                 />
 
                 <Text style={styles.label}>Pulse (bpm):</Text>
@@ -175,6 +189,24 @@ export default function InputScreen({ navigation }) {
                     keyboardType="decimal-pad"
                     placeholder="70.5"
                 />
+                <Text style={styles.label}>Wound Healing:</Text>
+                <TextInput
+                    style={styles.input}
+                    value={woundHealing}
+                    onChangeText={setWoundHealing}
+                    placeholder="Describe the wound healing progress"
+                />
+
+                <View style={styles.imagePicker}>
+                    <Button title="Pick a Wound Image" onPress={pickImage} />
+                    {woundImage && (
+                        <Image
+                            source={{ uri: woundImage }}
+                            style={styles.imagePreview}
+                        />
+                    )}
+                </View>
+
             </View>
 
             <View style={styles.sliderGroup}>
@@ -218,35 +250,12 @@ export default function InputScreen({ navigation }) {
                 />
             </View>
 
-            <View style={styles.inputGroup}>
-                <Text style={styles.label}>Wound Healing Progress:</Text>
-                <TextInput
-                    style={styles.input}
-                    value={woundHealing}
-                    onChangeText={setWoundHealing}
-                    placeholder="e.g., Healing well"
-                    multiline
-                />
-
-                <Text style={styles.label}>Wound Image:</Text>
-                <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
-                    {woundImage ? (
-                        <Image source={{ uri: woundImage }} style={styles.imagePreview} />
-                    ) : (
-                        <Text>Select an Image</Text>
-                    )}
-                </TouchableOpacity>
-            </View>
-
-            <TouchableOpacity
-                style={styles.saveButton}
-                onPress={handleSaveVitals}
-            >
-                <Text style={styles.saveButtonText}>Save Vitals</Text>
-            </TouchableOpacity>
+            <Button title="Save Vitals" onPress={handleSaveVitals} />
         </ScrollView>
     );
 }
+
+
 
 const styles = StyleSheet.create({
     container: {

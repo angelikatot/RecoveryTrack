@@ -38,34 +38,37 @@ const HistoryChart = ({ data }) => {
         // Define datasets with proper validation
         const datasets = [
             {
-                data: safeNumberMap(rawData, item =>
-                    item.vitals?.temperature),
+                data: safeNumberMap(rawData, item => item.vitals?.temperature),
                 strokeWidth: 2,
                 color: (opacity = 1) => `rgba(255, 0, 0, ${opacity})`, // Red for temperature
                 label: 'Temperature',
             },
             {
-                data: safeNumberMap(rawData, item =>
-                    item.vitals?.heartRate),
+                data: safeNumberMap(rawData, item => item.vitals?.systolic),
+                strokeWidth: 2,
+                color: (opacity = 1) => `rgba(0, 128, 255, ${opacity})`, // Blue for systolic
+                label: 'Systolic BP',
+            },
+            {
+                data: safeNumberMap(rawData, item => item.vitals?.diastolic),
+                strokeWidth: 2,
+                color: (opacity = 1) => `rgba(0, 255, 255, ${opacity})`, // Cyan for diastolic
+                label: 'Diastolic BP',
+            },
+            {
+                data: safeNumberMap(rawData, item => item.vitals?.heartRate),
                 strokeWidth: 2,
                 color: (opacity = 1) => `rgba(0, 255, 0, ${opacity})`, // Green for heart rate
                 label: 'Heart Rate',
             },
             {
-                data: safeNumberMap(rawData, item =>
-                    item.symptoms?.mood),
-                strokeWidth: 2,
-                color: (opacity = 1) => `rgba(0, 0, 255, ${opacity})`, // Blue for mood
-                label: 'Mood',
-            },
-            {
-                data: safeNumberMap(rawData, item =>
-                    item.vitals?.weight),
+                data: safeNumberMap(rawData, item => item.vitals?.weight),
                 strokeWidth: 2,
                 color: (opacity = 1) => `rgba(255, 165, 0, ${opacity})`, // Orange for weight
                 label: 'Weight',
             }
         ];
+
 
         return { labels, datasets };
     };
@@ -138,6 +141,7 @@ const HistoryChart = ({ data }) => {
                     </View>
                 ))}
             </View>
+
         </View>
     );
 };

@@ -20,6 +20,11 @@ export default function HistoryScreen() {
             ? date.toLocaleDateString() + ' ' + date.toLocaleTimeString()
             : 'Invalid date';
 
+        // Updated blood pressure display logic
+        const bloodPressure = vitals.systolic !== null && vitals.diastolic !== null
+            ? `${vitals.systolic}/${vitals.diastolic} mmHg`
+            : 'No data';
+
         return (
             <View style={styles.record}>
                 <Text style={styles.dateText}>Date: {formattedDate}</Text>
@@ -34,7 +39,7 @@ export default function HistoryScreen() {
                 <View style={styles.dataSection}>
                     <Text style={styles.sectionTitle}>Vitals:</Text>
                     <Text>Temperature: {vitals.temperature ? `${vitals.temperature}°C` : 'No data'}</Text>
-                    <Text>Blood Pressure: {vitals.bloodPressure || 'No data'}</Text>
+                    <Text>Blood Pressure: {bloodPressure}</Text>
                     <Text>Heart Rate: {vitals.heartRate ? `${vitals.heartRate} bpm` : 'No data'}</Text>
                     <Text>Weight: {vitals.weight ? `${vitals.weight} kg` : 'No data'}</Text>
                     <Text>Oxygen Saturation: {vitals.oxygenSaturation ? `${vitals.oxygenSaturation}%` : 'No data'}</Text>
@@ -43,6 +48,7 @@ export default function HistoryScreen() {
             </View>
         );
     };
+
 
     if (loading) {
         return (

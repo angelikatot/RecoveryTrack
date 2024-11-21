@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -7,14 +6,18 @@ import { useHistoryData } from '../components/DataFetching';
 
 export default function CalendarScreen() {
     const navigation = useNavigation();
-    const { history, loading, error, getVitalsByDate } = useHistoryData(); // Destructure getVitalsByDate from the hook
+    const { history, loading, error, getVitalsByDate } = useHistoryData();
 
     // Use effect to update marked dates based on history data
     useEffect(() => {
-        if (history) {
+        if (history.length > 0) {
             const marked = history.reduce((acc, record) => {
                 const date = record.date.split('T')[0]; // Extract date in 'YYYY-MM-DD' format
-                acc[date] = { marked: true, dotColor: 'blue' }; // Mark dates with a dot
+                acc[date] = {
+                    marked: true,
+                    dotColor: 'blue',
+                    selected: false
+                }; // Mark dates with a dot
                 return acc;
             }, {});
             setMarkedDates(marked); // Update the markedDates state
@@ -25,9 +28,9 @@ export default function CalendarScreen() {
 
     // Function to handle date selection and navigate to DailyVitalsScreen
     const handleDateSelect = (date) => {
-        const selectedRecord = getVitalsByDate(date);
-        if (selectedRecord) {
-            navigation.navigate('DailyVitalsScreen', { selectedRecord });
+        const selectedRecords = getVitalsByDate(date.dateString);
+        if (selectedRecords) {
+            navigation.navigate('DailyVitalsScreen', { selectedRecord: selectedRecords });
         } else {
             console.log('No data found for the selected date.');
         }
@@ -52,9 +55,8 @@ export default function CalendarScreen() {
 
     return (
         <View style={styles.container}>
-            {/* Display the calendar, and navigate to DailyVitalsScreen on date selection */}
             <Calendar
-                onDayPress={(day) => handleDateSelect(day.dateString)} // Handle day press
+                onDayPress={handleDateSelect} // Handle day press
                 markedDates={markedDates} // Display marked dates
                 markingType={'simple'} // Simple dot marking
             />

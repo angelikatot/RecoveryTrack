@@ -8,6 +8,7 @@ import HistoryScreen from './screens/HistoryScreen';
 import HomeScreen from './screens/HomeScreen';
 import CalendarScreen from './screens/CalendarScreen';
 import DailyVitalsScreen from './screens/DailyVitalsScreen';
+import ProfileScreen from './screens/ProfileScreen';
 
 import AuthScreen from './screens/AuthScreen';
 import { auth } from './services/firebaseConfig';
@@ -83,36 +84,20 @@ function AppScreens() {
           else if (route.name === 'InputScreen') iconName = 'create-outline';
           else if (route.name === 'HistoryScreen') iconName = 'time-outline';
           else if (route.name === 'CalendarScreen') iconName = 'calendar-outline';
-          else if (route.name === 'SignOut') iconName = 'log-out-outline';
+          else if (route.name === 'ProfileScreen') iconName = 'person-outline';
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarButton: (props) =>
-          route.name === 'SignOut' ? (
-            <Pressable
-              {...props}
-              onPress={handleSignOut}
-              style={({ pressed }) => [
-                props.style,
-                pressed && { opacity: 0.5 },
-              ]}
-            />
-          ) : (
-            <Pressable {...props} />
-          ),
       })}
     >
       <Tab.Screen name="HomeScreen" component={HomeScreen} options={{ title: 'Home' }} />
       <Tab.Screen name="InputScreen" component={InputScreen} options={{ title: 'Input' }} />
       <Tab.Screen name="HistoryScreen" component={HistoryScreen} options={{ title: 'History' }} />
       <Tab.Screen name="CalendarScreen" component={CalendarScreen} options={{ title: 'Calendar' }} />
-      <Tab.Screen name="SignOut" component={SignOutPlaceholder} options={{ title: 'Sign Out' }} />
+      <Tab.Screen name="ProfileScreen" component={ProfileScreen} options={{ title: 'Profile' }} />
     </Tab.Navigator>
   );
 }
 
 
-// Placeholder component for SignOut
-function SignOutPlaceholder() {
-  return null; // Empty component as placeholder for the sign-out functionality
-}
+
