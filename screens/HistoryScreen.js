@@ -1,54 +1,58 @@
-// HistoryScreen näyttö, joka näyttää käyttäjän tallentamia oireita. 
-// käyttää useHistoryData-hookia ja HistoryChart-komponenttia tiedon hakemiseen ja visualisointiin.
-
-
-
-import React from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useHistoryData } from '../components/DataFetching';
 import HistoryChart from '../components/HistoryChart';
 
 export default function HistoryScreen() {
     const { history, loading, error } = useHistoryData();
+    const [expanded, setExpanded] = useState(null); // Tracks the currently expanded section.
+    const [selectedVital, setSelectedVital] = useState(null);
 
-    const renderItem = ({ item }) => {
-        const symptoms = item.symptoms || {};
-        const vitals = item.vitals || {};
+    const vitalCharts = [
+        'temperature', 'systolic', 'diastolic',
+        'heartRate', 'weight', 'oxygenSaturation'
+    ];
 
-        const date = new Date(item.date);
-        const formattedDate = date instanceof Date && !isNaN(date)
-            ? date.toLocaleDateString() + ' ' + date.toLocaleTimeString()
-            : 'Invalid date';
-
-        // Updated blood pressure display logic
-        const bloodPressure = vitals.systolic !== null && vitals.diastolic !== null
-            ? `${vitals.systolic}/${vitals.diastolic} mmHg`
-            : 'No data';
+    const renderAccordionSection = (vital) => {
+        const sectionData = history.filter((record) => record.vitals[vital] !== null);
 
         return (
-            <View style={styles.record}>
-                <Text style={styles.dateText}>Date: {formattedDate}</Text>
-
-                <View style={styles.dataSection}>
-                    <Text style={styles.sectionTitle}>Symptoms:</Text>
-                    <Text>Pain: {symptoms.pain ?? 'No data'}</Text>
-                    <Text>Fatigue: {symptoms.fatigue ?? 'No data'}</Text>
-                    <Text>Mood: {symptoms.mood ?? 'No data'}</Text>
-                </View>
-
-                <View style={styles.dataSection}>
-                    <Text style={styles.sectionTitle}>Vitals:</Text>
-                    <Text>Temperature: {vitals.temperature ? `${vitals.temperature}°C` : 'No data'}</Text>
-                    <Text>Blood Pressure: {bloodPressure}</Text>
-                    <Text>Heart Rate: {vitals.heartRate ? `${vitals.heartRate} bpm` : 'No data'}</Text>
-                    <Text>Weight: {vitals.weight ? `${vitals.weight} kg` : 'No data'}</Text>
-                    <Text>Oxygen Saturation: {vitals.oxygenSaturation ? `${vitals.oxygenSaturation}%` : 'No data'}</Text>
-                    <Text>Wound Healing: {vitals.woundHealing || 'No data'}</Text>
-                </View>
+            <View key={vital}>
+                <TouchableOpacity
+                    style={styles.accordionHeader}
+                    onPress={() => handleAccordionPress(vital)}
+                >
+                    <Text style={styles.accordionHeaderText}>
+                        {vital.charAt(0).toUpperCase() + vital.slice(1)}
+                    </Text>
+                </TouchableOpacity>
+                {expanded === vital && (
+                    <View style={styles.accordionContent}>
+                        <HistoryChart
+                            data={sectionData}
+                            selectedVital={vital}
+                        />
+                        {sectionData.length > 0 ? (
+                            sectionData.map((record) => (
+                                <View key={record.date} style={styles.record}>
+                                    {/* Wrap the text content within a Text component */}
+                                    <Text>{`Date: ${new Date(record.date).toLocaleDateString()}`}</Text>
+                                    <Text>{`Value: ${record.vitals[vital]}`}</Text>
+                                </View>
+                            ))
+                        ) : (
+                            <Text style={styles.emptyText}>No records found for {vital}.</Text>
+                        )}
+                    </View>
+                )}
             </View>
         );
     };
 
+    const handleAccordionPress = (vital) => {
+        setExpanded(expanded === vital ? null : vital);
+        setSelectedVital(vital);
+    };
 
     if (loading) {
         return (
@@ -69,25 +73,9 @@ export default function HistoryScreen() {
     return (
         <View style={styles.container}>
             <Text style={styles.headerText}>History</Text>
-            {history.length > 0 ? (
-                <>
-                    <HistoryChart data={history} />
-                    <FlatList
-                        data={history}
-                        keyExtractor={(item, index) => item.id || index.toString()}
-                        renderItem={renderItem}
-                        ListEmptyComponent={
-                            <View style={styles.emptyContainer}>
-                                <Text style={styles.emptyText}>No records found</Text>
-                            </View>
-                        }
-                    />
-                </>
-            ) : (
-                <View style={styles.emptyContainer}>
-                    <Text style={styles.emptyText}>No records found</Text>
-                </View>
-            )}
+            <ScrollView>
+                {vitalCharts.map((vital) => renderAccordionSection(vital))}
+            </ScrollView>
         </View>
     );
 }
@@ -108,10 +96,25 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 20,
     },
-
-    record: {
+    accordionHeader: {
+        backgroundColor: '#e0e0e0',
         padding: 15,
-        marginVertical: 8,
+        marginBottom: 5,
+        borderRadius: 10,
+    },
+    accordionHeaderText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    accordionContent: {
+        padding: 10,
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        marginBottom: 10,
+    },
+    record: {
+        padding: 10,
+        marginVertical: 5,
         backgroundColor: 'white',
         borderRadius: 8,
         elevation: 2,
@@ -120,28 +123,13 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 2,
     },
-    dateText: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginBottom: 10,
-    },
-    dataSection: {
-        marginTop: 8,
-    },
-    sectionTitle: {
-        fontSize: 15,
-        fontWeight: '600',
-        marginBottom: 5,
+    emptyText: {
+        textAlign: 'center',
+        marginTop: 10,
+        color: '#666',
     },
     errorText: {
         color: 'red',
         textAlign: 'center',
     },
-    emptyText: {
-        textAlign: 'center',
-        marginTop: 20,
-        color: '#666',
-    },
 });
-
-//https://reactnative.dev/docs/flatlist

@@ -5,17 +5,12 @@ import { Dimensions, View, Text, StyleSheet } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
-const HistoryChart = ({ data }) => {
-    // Validate and prepare data for the chart
-    const prepareChartData = (rawData) => {
+const HistoryChart = ({ data, selectedVital = null }) => {
+    const prepareChartData = (rawData, vital) => {
         if (!Array.isArray(rawData) || rawData.length === 0) {
-            return {
-                labels: [],
-                datasets: []
-            };
+            return { labels: [], datasets: [] };
         }
 
-        // Helper function to safely map numeric values
         const safeNumberMap = (items, valueAccessor) => {
             return items.map(item => {
                 const value = valueAccessor(item);
@@ -23,7 +18,6 @@ const HistoryChart = ({ data }) => {
             });
         };
 
-        // Helper function to format dates
         const formatDate = (dateString) => {
             try {
                 return new Date(dateString).toLocaleDateString();
@@ -32,51 +26,71 @@ const HistoryChart = ({ data }) => {
             }
         };
 
-        // Get valid labels (dates)
         const labels = rawData.map(item => formatDate(item.date));
 
-        // Define datasets with proper validation
-        const datasets = [
-            {
-                data: safeNumberMap(rawData, item => item.vitals?.temperature),
-                strokeWidth: 2,
-                color: (opacity = 1) => `rgba(255, 0, 0, ${opacity})`, // Red for temperature
-                label: 'Temperature',
+        // Vital-specific color and accessor mapping
+        const vitalConfigs = {
+            temperature: {
+                accessor: item => item.vitals?.temperature,
+                color: (opacity = 1) => `rgba(255, 0, 0, ${opacity})`,
+                label: 'Temperature (°C)'
             },
-            {
-                data: safeNumberMap(rawData, item => item.vitals?.systolic),
-                strokeWidth: 2,
-                color: (opacity = 1) => `rgba(0, 128, 255, ${opacity})`, // Blue for systolic
-                label: 'Systolic BP',
+            systolic: {
+                accessor: item => item.vitals?.systolic,
+                color: (opacity = 1) => `rgba(0, 128, 255, ${opacity})`,
+                label: 'Systolic BP (mmHg)'
             },
-            {
-                data: safeNumberMap(rawData, item => item.vitals?.diastolic),
-                strokeWidth: 2,
-                color: (opacity = 1) => `rgba(0, 255, 255, ${opacity})`, // Cyan for diastolic
-                label: 'Diastolic BP',
+            diastolic: {
+                accessor: item => item.vitals?.diastolic,
+                color: (opacity = 1) => `rgba(0, 255, 255, ${opacity})`,
+                label: 'Diastolic BP (mmHg)'
             },
-            {
-                data: safeNumberMap(rawData, item => item.vitals?.heartRate),
-                strokeWidth: 2,
-                color: (opacity = 1) => `rgba(0, 255, 0, ${opacity})`, // Green for heart rate
-                label: 'Heart Rate',
+            heartRate: {
+                accessor: item => item.vitals?.heartRate,
+                color: (opacity = 1) => `rgba(0, 255, 0, ${opacity})`,
+                label: 'Heart Rate (bpm)'
             },
-            {
-                data: safeNumberMap(rawData, item => item.vitals?.weight),
-                strokeWidth: 2,
-                color: (opacity = 1) => `rgba(255, 165, 0, ${opacity})`, // Orange for weight
-                label: 'Weight',
+            weight: {
+                accessor: item => item.vitals?.weight,
+                color: (opacity = 1) => `rgba(255, 165, 0, ${opacity})`,
+                label: 'Weight (kg)'
+            },
+            oxygenSaturation: {
+                accessor: item => item.vitals?.oxygenSaturation,
+                color: (opacity = 1) => `rgba(128, 0, 128, ${opacity})`,
+                label: 'Oxygen Saturation (%)'
             }
-        ];
+        };
 
+        // If no specific vital selected, use default behavior
+        if (!selectedVital) {
+            const datasets = Object.keys(vitalConfigs).map(key => ({
+                data: safeNumberMap(rawData, vitalConfigs[key].accessor),
+                strokeWidth: 2,
+                color: vitalConfigs[key].color,
+                label: vitalConfigs[key].label
+            }));
+            return { labels, datasets };
+        }
+
+        // If a specific vital is selected
+        const vitalConfig = vitalConfigs[selectedVital];
+        if (!vitalConfig) {
+            return { labels: [], datasets: [] };
+        }
+
+        const datasets = [{
+            data: safeNumberMap(rawData, vitalConfig.accessor),
+            strokeWidth: 2,
+            color: vitalConfig.color,
+            label: vitalConfig.label
+        }];
 
         return { labels, datasets };
     };
 
-    // Prepare the chart data with validation
-    const chartData = prepareChartData(data);
+    const chartData = prepareChartData(data, selectedVital);
 
-    // If no valid data, show a message
     if (chartData.labels.length === 0) {
         return (
             <View style={styles.container}>
@@ -87,7 +101,11 @@ const HistoryChart = ({ data }) => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Vitals History</Text>
+            <Text style={styles.title}>
+                {selectedVital
+                    ? `${chartData.datasets[0].label} History`
+                    : 'Vitals History'}
+            </Text>
             <LineChart
                 data={chartData}
                 width={width - 40}
@@ -99,52 +117,47 @@ const HistoryChart = ({ data }) => {
                     decimalPlaces: 1,
                     color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
                     labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                    style: {
-                        borderRadius: 16,
-                    },
+                    style: { borderRadius: 16 },
                     propsForDots: {
                         r: '6',
                         strokeWidth: '2',
                         stroke: '#ffa726',
                     },
-                    // Add these props to prevent NaN errors
                     useShadowColorFromDataset: false,
                     strokeWidth: 2,
-                    propsForBackgroundLines: {
-                        strokeDasharray: '', // solid background lines
-                    },
+                    propsForBackgroundLines: { strokeDasharray: '' },
                 }}
-                bezier // Make the lines curved
+                bezier
                 style={styles.chart}
-                // Add these props to improve chart behavior
                 withDots={true}
                 withInnerLines={true}
                 withOuterLines={true}
                 withVerticalLines={true}
                 withHorizontalLines={true}
-                fromZero={true} // Start Y axis from 0
-                // Handle empty data gracefully
+                fromZero={true}
                 getDotColor={(dataPoint, dataSetIndex) => {
                     return chartData.datasets[dataSetIndex]?.color(1) || '#000000';
                 }}
             />
-            <View style={styles.legend}>
-                {chartData.datasets.map((dataset, index) => (
-                    <View key={index} style={styles.legendItem}>
-                        <View
-                            style={[
-                                styles.legendColor,
-                                { backgroundColor: dataset.color(1) }
-                            ]}
-                        />
-                        <Text style={styles.legendText}>{dataset.label}</Text>
-                    </View>
-                ))}
-            </View>
-
+            {!selectedVital && (
+                <View style={styles.legend}>
+                    {chartData.datasets.map((dataset, index) => (
+                        <View key={index} style={styles.legendItem}>
+                            <View
+                                style={[
+                                    styles.legendColor,
+                                    { backgroundColor: dataset.color(1) }
+                                ]}
+                            />
+                            <Text style={styles.legendText}>{dataset.label}</Text>
+                        </View>
+                    ))}
+                </View>
+            )}
         </View>
     );
 };
+
 
 const styles = StyleSheet.create({
     container: {
