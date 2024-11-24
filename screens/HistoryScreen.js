@@ -1,3 +1,4 @@
+// HistoryScreen.js
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useHistoryData } from '../components/DataFetching';
@@ -5,16 +6,28 @@ import HistoryChart from '../components/HistoryChart';
 
 export default function HistoryScreen() {
     const { history, loading, error } = useHistoryData();
-    const [expanded, setExpanded] = useState(null); // Tracks the currently expanded section.
+    const [expanded, setExpanded] = useState(null);
     const [selectedVital, setSelectedVital] = useState(null);
 
     const vitalCharts = [
-        'temperature', 'systolic', 'diastolic',
+        'temperature', 'bloodPressure', // replaces 'systolic' and 'diastolic'
         'heartRate', 'weight', 'oxygenSaturation'
     ];
-
     const renderAccordionSection = (vital) => {
-        const sectionData = history.filter((record) => record.vitals[vital] !== null);
+        // Special handling for blood pressure
+        const hasBPData = vital === 'bloodPressure'
+            ? history.some(day =>
+                day.vitals.systolic !== null || day.vitals.diastolic !== null)
+            : history.some(day => day.vitals[vital] !== null);
+
+        const getBPValue = (record) => {
+            const systolic = record.vitals.systolic;
+            const diastolic = record.vitals.diastolic;
+            if (systolic !== null && diastolic !== null) {
+                return `${systolic}/${diastolic}`;
+            }
+            return 'No data';
+        };
 
         return (
             <View key={vital}>
@@ -23,25 +36,51 @@ export default function HistoryScreen() {
                     onPress={() => handleAccordionPress(vital)}
                 >
                     <Text style={styles.accordionHeaderText}>
-                        {vital.charAt(0).toUpperCase() + vital.slice(1)}
+                        {vital === 'bloodPressure'
+                            ? 'Blood Pressure'
+                            : vital.charAt(0).toUpperCase() + vital.slice(1)}
                     </Text>
                 </TouchableOpacity>
                 {expanded === vital && (
                     <View style={styles.accordionContent}>
                         <HistoryChart
-                            data={sectionData}
+                            data={history}
                             selectedVital={vital}
                         />
-                        {sectionData.length > 0 ? (
-                            sectionData.map((record) => (
-                                <View key={record.date} style={styles.record}>
-                                    {/* Wrap the text content within a Text component */}
-                                    <Text>{`Date: ${new Date(record.date).toLocaleDateString()}`}</Text>
-                                    <Text>{`Value: ${record.vitals[vital]}`}</Text>
+                        {history.length > 0 ? (
+                            history.map((day) => (
+                                <View key={day.date}>
+                                    <Text style={styles.dateHeader}>
+                                        {new Date(day.date).toLocaleDateString()}
+                                    </Text>
+                                    {vital === 'bloodPressure' ? (
+                                        <Text style={styles.medianValue}>
+                                            Daily Median: {day.vitals.systolic?.toFixed(0) || '-'}/
+                                            {day.vitals.diastolic?.toFixed(0) || '-'} mmHg
+                                        </Text>
+                                    ) : (
+                                        <Text style={styles.medianValue}>
+                                            Daily Median: {day.vitals[vital]?.toFixed(1) || 'No data'}
+                                        </Text>
+                                    )}
+                                    {day.records.map((record, index) => (
+                                        <View key={index} style={styles.record}>
+                                            <Text style={styles.recordTime}>
+                                                {record.formattedTime}
+                                            </Text>
+                                            <Text style={styles.recordValue}>
+                                                {vital === 'bloodPressure'
+                                                    ? `BP: ${getBPValue(record)}`
+                                                    : `Value: ${record.vitals[vital]}`}
+                                            </Text>
+                                        </View>
+                                    ))}
                                 </View>
                             ))
                         ) : (
-                            <Text style={styles.emptyText}>No records found for {vital}.</Text>
+                            <Text style={styles.emptyText}>
+                                No records found for {vital === 'bloodPressure' ? 'blood pressure' : vital}.
+                            </Text>
                         )}
                     </View>
                 )}
@@ -72,7 +111,7 @@ export default function HistoryScreen() {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.headerText}>History</Text>
+            <Text style={styles.headerText}>History (Last 7 Days)</Text>
             <ScrollView>
                 {vitalCharts.map((vital) => renderAccordionSection(vital))}
             </ScrollView>
@@ -95,6 +134,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: 'bold',
         marginBottom: 20,
+        textAlign: 'center',
     },
     accordionHeader: {
         backgroundColor: '#e0e0e0',
@@ -112,16 +152,32 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         marginBottom: 10,
     },
+    dateHeader: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginTop: 15,
+        marginBottom: 5,
+    },
+    medianValue: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 10,
+    },
     record: {
-        padding: 10,
-        marginVertical: 5,
-        backgroundColor: 'white',
-        borderRadius: 8,
-        elevation: 2,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.2,
-        shadowRadius: 2,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        padding: 8,
+        marginVertical: 2,
+        backgroundColor: '#f8f8f8',
+        borderRadius: 5,
+    },
+    recordTime: {
+        fontSize: 14,
+        color: '#444',
+    },
+    recordValue: {
+        fontSize: 14,
+        color: '#444',
     },
     emptyText: {
         textAlign: 'center',

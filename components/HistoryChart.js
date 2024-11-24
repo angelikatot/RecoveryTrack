@@ -1,4 +1,5 @@
 // HistoryChart kaavio näyttää vitaalit (mm. lämpötila) kaavioina. toimii historyscreenin ja datafetchinging kanssa yhteistyössä
+// HistoryChart.js
 import React from 'react';
 import { LineChart } from 'react-native-chart-kit';
 import { Dimensions, View, Text, StyleSheet } from 'react-native';
@@ -11,39 +12,25 @@ const HistoryChart = ({ data, selectedVital = null }) => {
             return { labels: [], datasets: [] };
         }
 
-        const safeNumberMap = (items, valueAccessor) => {
-            return items.map(item => {
-                const value = valueAccessor(item);
-                return typeof value === 'number' && !isNaN(value) ? value : 0;
-            });
-        };
-
         const formatDate = (dateString) => {
-            try {
-                return new Date(dateString).toLocaleDateString();
-            } catch (e) {
-                return '';
-            }
+            const date = new Date(dateString);
+            return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
         };
 
         const labels = rawData.map(item => formatDate(item.date));
 
-        // Vital-specific color and accessor mapping
         const vitalConfigs = {
             temperature: {
                 accessor: item => item.vitals?.temperature,
                 color: (opacity = 1) => `rgba(255, 0, 0, ${opacity})`,
                 label: 'Temperature (°C)'
             },
-            systolic: {
-                accessor: item => item.vitals?.systolic,
-                color: (opacity = 1) => `rgba(0, 128, 255, ${opacity})`,
-                label: 'Systolic BP (mmHg)'
-            },
-            diastolic: {
-                accessor: item => item.vitals?.diastolic,
-                color: (opacity = 1) => `rgba(0, 255, 255, ${opacity})`,
-                label: 'Diastolic BP (mmHg)'
+            bloodPressure: {
+                systolicAccessor: item => item.vitals?.systolic,
+                diastolicAccessor: item => item.vitals?.diastolic,
+                systolicColor: (opacity = 1) => `rgba(0, 128, 255, ${opacity})`,
+                diastolicColor: (opacity = 1) => `rgba(0, 255, 255, ${opacity})`,
+                label: 'Blood Pressure (mmHg)'
             },
             heartRate: {
                 accessor: item => item.vitals?.heartRate,
@@ -62,31 +49,38 @@ const HistoryChart = ({ data, selectedVital = null }) => {
             }
         };
 
-        // If no specific vital selected, use default behavior
-        if (!selectedVital) {
-            const datasets = Object.keys(vitalConfigs).map(key => ({
-                data: safeNumberMap(rawData, vitalConfigs[key].accessor),
-                strokeWidth: 2,
-                color: vitalConfigs[key].color,
-                label: vitalConfigs[key].label
-            }));
-            return { labels, datasets };
+        if (selectedVital === 'bloodPressure') {
+            return {
+                labels,
+                datasets: [
+                    {
+                        data: rawData.map(item => vitalConfigs.bloodPressure.systolicAccessor(item) || 0),
+                        color: vitalConfigs.bloodPressure.systolicColor,
+                        strokeWidth: 2,
+                        label: 'Systolic'
+                    },
+                    {
+                        data: rawData.map(item => vitalConfigs.bloodPressure.diastolicAccessor(item) || 0),
+                        color: vitalConfigs.bloodPressure.diastolicColor,
+                        strokeWidth: 2,
+                        label: 'Diastolic'
+                    }
+                ]
+            };
+        } else if (selectedVital && vitalConfigs[selectedVital]) {
+            const config = vitalConfigs[selectedVital];
+            return {
+                labels,
+                datasets: [{
+                    data: rawData.map(item => config.accessor(item) || 0),
+                    color: config.color,
+                    strokeWidth: 2,
+                    label: config.label
+                }]
+            };
         }
 
-        // If a specific vital is selected
-        const vitalConfig = vitalConfigs[selectedVital];
-        if (!vitalConfig) {
-            return { labels: [], datasets: [] };
-        }
-
-        const datasets = [{
-            data: safeNumberMap(rawData, vitalConfig.accessor),
-            strokeWidth: 2,
-            color: vitalConfig.color,
-            label: vitalConfig.label
-        }];
-
-        return { labels, datasets };
+        return { labels, datasets: [] };
     };
 
     const chartData = prepareChartData(data, selectedVital);
@@ -102,30 +96,30 @@ const HistoryChart = ({ data, selectedVital = null }) => {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>
-                {selectedVital
-                    ? `${chartData.datasets[0].label} History`
-                    : 'Vitals History'}
+                {selectedVital === 'bloodPressure'
+                    ? 'Blood Pressure (mmHg)'
+                    : selectedVital
+                        ? `${chartData.datasets[0].label}`
+                        : 'Vitals History'}
             </Text>
             <LineChart
                 data={chartData}
                 width={width - 40}
                 height={220}
                 chartConfig={{
-                    backgroundColor: '#e26a00',
-                    backgroundGradientFrom: '#fb8c00',
-                    backgroundGradientTo: '#ffa726',
+                    backgroundColor: '#fff',
+                    backgroundGradientFrom: '#fff',
+                    backgroundGradientTo: '#fff',
                     decimalPlaces: 1,
-                    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                    labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                    style: { borderRadius: 16 },
-                    propsForDots: {
-                        r: '6',
-                        strokeWidth: '2',
-                        stroke: '#ffa726',
+                    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                    style: {
+                        borderRadius: 16
                     },
-                    useShadowColorFromDataset: false,
-                    strokeWidth: 2,
-                    propsForBackgroundLines: { strokeDasharray: '' },
+                    propsForDots: {
+                        r: '4',
+                        strokeWidth: '2',
+                    }
                 }}
                 bezier
                 style={styles.chart}
@@ -134,30 +128,26 @@ const HistoryChart = ({ data, selectedVital = null }) => {
                 withOuterLines={true}
                 withVerticalLines={true}
                 withHorizontalLines={true}
-                fromZero={true}
+                fromZero={false}
                 getDotColor={(dataPoint, dataSetIndex) => {
                     return chartData.datasets[dataSetIndex]?.color(1) || '#000000';
                 }}
             />
-            {!selectedVital && (
+            {selectedVital === 'bloodPressure' && (
                 <View style={styles.legend}>
-                    {chartData.datasets.map((dataset, index) => (
-                        <View key={index} style={styles.legendItem}>
-                            <View
-                                style={[
-                                    styles.legendColor,
-                                    { backgroundColor: dataset.color(1) }
-                                ]}
-                            />
-                            <Text style={styles.legendText}>{dataset.label}</Text>
-                        </View>
-                    ))}
+                    <View style={styles.legendItem}>
+                        <View style={[styles.legendColor, { backgroundColor: chartData.datasets[0].color(1) }]} />
+                        <Text style={styles.legendText}>Systolic</Text>
+                    </View>
+                    <View style={styles.legendItem}>
+                        <View style={[styles.legendColor, { backgroundColor: chartData.datasets[1].color(1) }]} />
+                        <Text style={styles.legendText}>Diastolic</Text>
+                    </View>
                 </View>
             )}
         </View>
     );
 };
-
 
 const styles = StyleSheet.create({
     container: {
@@ -170,6 +160,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         marginBottom: 10,
+        textAlign: 'center',
     },
     chart: {
         marginVertical: 8,
@@ -183,15 +174,13 @@ const styles = StyleSheet.create({
     },
     legend: {
         flexDirection: 'row',
-        flexWrap: 'wrap',
         justifyContent: 'center',
         marginTop: 10,
+        gap: 20,
     },
     legendItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginRight: 15,
-        marginBottom: 5,
     },
     legendColor: {
         width: 10,
@@ -201,9 +190,8 @@ const styles = StyleSheet.create({
     },
     legendText: {
         fontSize: 12,
-    },
+    }
 });
 
 export default HistoryChart;
-
 //https://github.com/indiespirit/react-native-chart-kit

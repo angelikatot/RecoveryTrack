@@ -20,6 +20,21 @@ export default function InputScreen({ navigation }) {
     const [woundHealing, setWoundHealing] = useState('');
     const [woundImage, setWoundImage] = useState(null);
 
+    const resetForm = () => {
+        // Reset all form fields to their initial values
+        setPain(0);
+        setFatigue(0);
+        setMood(0);
+        setTemperature('');
+        setSystolic('');
+        setDiastolic('');
+        setHeartRate('');
+        setOxygenSaturation('');
+        setWeight('');
+        setWoundHealing('');
+        setWoundImage(null);
+    };
+
     const pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -118,10 +133,21 @@ export default function InputScreen({ navigation }) {
                         woundImage: woundImageUrl,
                     },
                 };
-                console.log(data);
+
                 await set(recordRef, data);
-                Alert.alert('Success', 'Data saved successfully!');
-                navigation.navigate('HistoryScreen');
+                Alert.alert(
+                    'Success',
+                    'Data saved successfully!',
+                    [
+                        {
+                            text: 'OK',
+                            onPress: () => {
+                                resetForm();
+                                navigation.navigate('HistoryScreen');
+                            }
+                        }
+                    ]
+                );
             } catch (error) {
                 console.error('Error saving data: ', error);
                 Alert.alert('Error', 'Error saving data. Please try again.');
@@ -206,7 +232,6 @@ export default function InputScreen({ navigation }) {
                         />
                     )}
                 </View>
-
             </View>
 
             <View style={styles.sliderGroup}>
@@ -254,8 +279,6 @@ export default function InputScreen({ navigation }) {
         </ScrollView>
     );
 }
-
-
 
 const styles = StyleSheet.create({
     container: {
