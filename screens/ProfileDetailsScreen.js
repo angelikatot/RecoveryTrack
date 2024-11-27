@@ -1,18 +1,17 @@
-
 import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
     TextInput,
-    Button,
+    TouchableOpacity,
     ScrollView,
     StyleSheet,
     Alert,
-    TouchableOpacity,
     KeyboardAvoidingView,
     Platform
 } from 'react-native';
 import { saveUserProfile, getUserProfile } from '../services/userProfileService';
+import DateTimePicker from '@react-native-community/datetimepicker'; // For Date Picker
 
 const ProfileDetailsScreen = ({ navigation }) => {
     const [name, setName] = useState('');
@@ -20,6 +19,7 @@ const ProfileDetailsScreen = ({ navigation }) => {
     const [medications, setMedications] = useState('');
     const [contactDetails, setContactDetails] = useState('');
     const [emergencyContact, setEmergencyContact] = useState('');
+    const [dateOfDischarge, setDateOfDischarge] = useState(new Date());
 
     useEffect(() => {
         const fetchProfileData = async () => {
@@ -31,6 +31,7 @@ const ProfileDetailsScreen = ({ navigation }) => {
                     setMedications(profileData.medications || '');
                     setContactDetails(profileData.contactDetails || '');
                     setEmergencyContact(profileData.emergencyContact || '');
+                    setDateOfDischarge(new Date(profileData.dateOfDischarge || new Date()));
                 }
             } catch (error) {
                 console.error('Error fetching profile:', error);
@@ -53,7 +54,8 @@ const ProfileDetailsScreen = ({ navigation }) => {
                 age: age.trim(),
                 medications: medications.trim(),
                 contactDetails: contactDetails.trim(),
-                emergencyContact: emergencyContact.trim()
+                emergencyContact: emergencyContact.trim(),
+                dateOfDischarge: dateOfDischarge.toISOString(), // Save as ISO string
             };
 
             await saveUserProfile(profileData);
@@ -75,12 +77,10 @@ const ProfileDetailsScreen = ({ navigation }) => {
             style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-            <ScrollView
-                contentContainerStyle={styles.scrollContainer}
-                keyboardShouldPersistTaps="handled"
-            >
+            <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <Text style={styles.title}>My Personal Details</Text>
 
+                {/* Input Fields */}
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>Full Name*</Text>
                     <TextInput
@@ -98,6 +98,14 @@ const ProfileDetailsScreen = ({ navigation }) => {
                         onChangeText={setAge}
                         placeholder="Enter your age"
                         keyboardType="numeric"
+                    />
+
+                    <Text style={styles.label}>Date of Discharge</Text>
+                    <DateTimePicker
+                        value={dateOfDischarge}
+                        mode="date"
+                        display="default"
+                        onChange={(event, selectedDate) => setDateOfDischarge(selectedDate || dateOfDischarge)}
                     />
 
                     <Text style={styles.label}>Current Medications</Text>
@@ -127,10 +135,7 @@ const ProfileDetailsScreen = ({ navigation }) => {
                         multiline
                     />
 
-                    <TouchableOpacity
-                        style={styles.saveButton}
-                        onPress={handleSaveProfile}
-                    >
+                    <TouchableOpacity style={styles.saveButton} onPress={handleSaveProfile}>
                         <Text style={styles.saveButtonText}>Save Profile</Text>
                     </TouchableOpacity>
                 </View>
@@ -138,6 +143,8 @@ const ProfileDetailsScreen = ({ navigation }) => {
         </KeyboardAvoidingView>
     );
 };
+
+
 
 const styles = StyleSheet.create({
     container: {

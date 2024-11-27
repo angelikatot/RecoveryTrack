@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
 import { Image } from 'react-native';
 
 const DailyVitalsScreen = ({ route }) => {
@@ -15,40 +15,84 @@ const DailyVitalsScreen = ({ route }) => {
 
     // Render multiple records if available
     return (
-        <ScrollView style={styles.container}>
-            <Text style={styles.headerText}>Vitals for {new Date(selectedRecord[0].date).toLocaleDateString()}</Text>
+        <ScrollView style={styles.container} contentContainerStyle={styles.scrollContentContainer}>
+            <Text style={styles.headerText}>
+                Vitals for {new Date(selectedRecord[0].date).toLocaleDateString()}
+            </Text>
 
             {selectedRecord.map((record, index) => (
                 <View key={index} style={styles.recordContainer}>
-                    <Text style={styles.recordTime}>
-                        {new Date(record.date).toLocaleTimeString()}
-                    </Text>
-
-                    <View style={styles.dataSection}>
-                        <Text style={styles.sectionTitle}>Symptoms:</Text>
-                        <Text>Pain: {record.symptoms.pain ?? 'No data'}</Text>
-                        <Text>Fatigue: {record.symptoms.fatigue ?? 'No data'}</Text>
-                        <Text>Mood: {record.symptoms.mood ?? 'No data'}</Text>
+                    <View style={styles.recordTimeContainer}>
+                        <Text style={styles.recordTime}>
+                            {new Date(record.date).toLocaleTimeString()}
+                        </Text>
                     </View>
 
                     <View style={styles.dataSection}>
-                        <Text style={styles.sectionTitle}>Vitals:</Text>
-                        <Text>Temperature: {record.vitals.temperature ? `${record.vitals.temperature}°C` : 'No data'}</Text>
-                        <Text>
-                            Blood Pressure: {record.vitals.systolic !== null && record.vitals.diastolic !== null
-                                ? `${record.vitals.systolic}/${record.vitals.diastolic} mmHg`
-                                : 'No data'}
-                        </Text>
-                        <Text>Heart Rate: {record.vitals.heartRate ? `${record.vitals.heartRate} bpm` : 'No data'}</Text>
-                        <Text>Weight: {record.vitals.weight ? `${record.vitals.weight} kg` : 'No data'}</Text>
-                        <Text>Oxygen Saturation: {record.vitals.oxygenSaturation ? `${record.vitals.oxygenSaturation}%` : 'No data'}</Text>
-                        <Text>Wound Healing: {record.vitals.woundHealing || 'No data'}</Text>
+                        <Text style={styles.sectionTitle}>Symptoms</Text>
+                        <View style={styles.dataRow}>
+                            <Text style={styles.dataLabel}>Pain:</Text>
+                            <Text style={styles.dataValue}>{record.symptoms.pain ?? 'No data'}</Text>
+                        </View>
+                        <View style={styles.dataRow}>
+                            <Text style={styles.dataLabel}>Fatigue:</Text>
+                            <Text style={styles.dataValue}>{record.symptoms.fatigue ?? 'No data'}</Text>
+                        </View>
+                        <View style={styles.dataRow}>
+                            <Text style={styles.dataLabel}>Mood:</Text>
+                            <Text style={styles.dataValue}>{record.symptoms.mood ?? 'No data'}</Text>
+                        </View>
+                    </View>
+
+                    <View style={styles.dataSection}>
+                        <Text style={styles.sectionTitle}>Vitals</Text>
+                        <View style={styles.dataRow}>
+                            <Text style={styles.dataLabel}>Temperature:</Text>
+                            <Text style={styles.dataValue}>
+                                {record.vitals.temperature ? `${record.vitals.temperature}°C` : 'No data'}
+                            </Text>
+                        </View>
+                        <View style={styles.dataRow}>
+                            <Text style={styles.dataLabel}>Blood Pressure:</Text>
+                            <Text style={styles.dataValue}>
+                                {record.vitals.systolic !== null && record.vitals.diastolic !== null
+                                    ? `${record.vitals.systolic}/${record.vitals.diastolic} mmHg`
+                                    : 'No data'}
+                            </Text>
+                        </View>
+                        <View style={styles.dataRow}>
+                            <Text style={styles.dataLabel}>Heart Rate:</Text>
+                            <Text style={styles.dataValue}>
+                                {record.vitals.heartRate ? `${record.vitals.heartRate} bpm` : 'No data'}
+                            </Text>
+                        </View>
+                        <View style={styles.dataRow}>
+                            <Text style={styles.dataLabel}>Weight:</Text>
+                            <Text style={styles.dataValue}>
+                                {record.vitals.weight ? `${record.vitals.weight} kg` : 'No data'}
+                            </Text>
+                        </View>
+                        <View style={styles.dataRow}>
+                            <Text style={styles.dataLabel}>Oxygen Saturation:</Text>
+                            <Text style={styles.dataValue}>
+                                {record.vitals.oxygenSaturation ? `${record.vitals.oxygenSaturation}%` : 'No data'}
+                            </Text>
+                        </View>
+                        <View style={styles.dataRow}>
+                            <Text style={styles.dataLabel}>Wound Healing:</Text>
+                            <Text style={styles.dataValue}>
+                                {record.vitals.woundHealing || 'No data'}
+                            </Text>
+                        </View>
 
                         {record.vitals.woundImage && (
-                            <Image
-                                source={{ uri: record.vitals.woundImage }}
-                                style={styles.woundImage}
-                            />
+                            <View style={styles.woundImageContainer}>
+                                <Text style={styles.sectionTitle}>Wound Image</Text>
+                                <Image
+                                    source={{ uri: record.vitals.woundImage }}
+                                    style={styles.woundImage}
+                                />
+                            </View>
                         )}
                     </View>
                 </View>
@@ -57,53 +101,93 @@ const DailyVitalsScreen = ({ route }) => {
     );
 };
 
+const { width } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#F0F4F8', // Soft background from previous screens
+    },
+    scrollContentContainer: {
+        paddingVertical: 40,
+        paddingHorizontal: 20,
+    },
+    headerText: {
+        fontSize: 24,
+        fontWeight: '600',
+        color: '#2d4150',
+        textAlign: 'center',
+        marginBottom: 20,
     },
     recordContainer: {
-        backgroundColor: 'white',
-        borderRadius: 10,
-        padding: 15,
-        marginBottom: 15,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 20,
+        marginBottom: 20,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
+        shadowRadius: 8,
+        elevation: 5,
+        padding: 15,
     },
-    headerText: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 20,
+    recordTimeContainer: {
+        alignItems: 'center',
+        marginBottom: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E0E0E0',
+        paddingBottom: 10,
     },
     recordTime: {
         fontSize: 16,
-        color: '#666',
-        marginBottom: 10,
+        color: '#4A90E2',
+        fontWeight: '500',
     },
     dataSection: {
-        marginTop: 8,
+        marginBottom: 15,
     },
     sectionTitle: {
-        fontSize: 15,
+        fontSize: 18,
         fontWeight: '600',
-        marginBottom: 5,
+        color: '#4A90E2',
+        marginBottom: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E0E0E0',
+        paddingBottom: 5,
+    },
+    dataRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 8,
+        paddingHorizontal: 10,
+    },
+    dataLabel: {
+        fontSize: 16,
+        color: '#2d4150',
+        flex: 1,
+    },
+    dataValue: {
+        fontSize: 16,
+        color: '#4A90E2',
+        fontWeight: '500',
+        textAlign: 'right',
+        flex: 1,
     },
     noDataText: {
         textAlign: 'center',
-        fontSize: 16,
-        color: '#666',
+        fontSize: 18,
+        color: '#4A90E2',
         padding: 20,
+        marginTop: 40,
+    },
+    woundImageContainer: {
+        marginTop: 15,
     },
     woundImage: {
         width: '100%',
         height: 200,
         resizeMode: 'cover',
+        borderRadius: 15,
         marginTop: 10,
-        borderRadius: 8,
     },
 });
 

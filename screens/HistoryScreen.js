@@ -8,6 +8,18 @@ export default function HistoryScreen() {
     const [expanded, setExpanded] = useState(null);
     const [selectedVital, setSelectedVital] = useState(null);
 
+    // Pastel color palette for different vitals
+    const vitalColors = {
+        temperature: '#A5D8FF',      // Soft Pastel Blue
+        bloodPressure: '#B0C4DE',    // Light Steel Blue (pastel)
+        heartRate: '#E6C3FF',        // Soft Pastel Purple
+        weight: '#D8BFD8',           // Thistle (pastel purple)
+        oxygenSaturation: '#B0E0E6', // Powder Blue (pastel cyan)
+        pain: '#FFB3BA',             // Pastel Pink
+        mood: '#C1FFC1',             // Pastel Green
+        fatigue: '#FFE4B5'           // Moccasin (soft pastel orange)
+    };
+
     const vitalCharts = [
         'temperature', 'bloodPressure',
         'heartRate', 'weight', 'oxygenSaturation',
@@ -39,7 +51,10 @@ export default function HistoryScreen() {
         return (
             <View key={vital}>
                 <TouchableOpacity
-                    style={styles.accordionHeader}
+                    style={[
+                        styles.accordionHeader,
+                        { backgroundColor: vitalColors[vital] }
+                    ]}
                     onPress={() => handleAccordionPress(vital)}
                 >
                     <Text style={styles.accordionHeaderText}>
@@ -110,7 +125,7 @@ export default function HistoryScreen() {
     if (loading) {
         return (
             <View style={styles.centerContainer}>
-                <ActivityIndicator size="large" color="#0000ff" />
+                <ActivityIndicator size="large" color="#A5D8FF" />
             </View>
         );
     }
@@ -137,21 +152,22 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#F0F4F8', // Softer, more muted light blue background
     },
     centerContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: '#F0F4F8',
     },
     headerText: {
         fontSize: 20,
         fontWeight: 'bold',
         marginBottom: 20,
         textAlign: 'center',
+        color: '#333',
     },
     accordionHeader: {
-        backgroundColor: '#e0e0e0',
         padding: 15,
         marginBottom: 5,
         borderRadius: 10,
@@ -159,18 +175,25 @@ const styles = StyleSheet.create({
     accordionHeaderText: {
         fontSize: 16,
         fontWeight: 'bold',
+        color: '#333', // Darker text for better readability on pastel backgrounds
     },
     accordionContent: {
         padding: 10,
         backgroundColor: '#fff',
         borderRadius: 10,
         marginBottom: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
     },
     dateHeader: {
         fontSize: 16,
         fontWeight: 'bold',
         marginTop: 15,
         marginBottom: 5,
+        color: '#333',
     },
     medianValue: {
         fontSize: 14,
@@ -199,7 +222,7 @@ const styles = StyleSheet.create({
         color: '#666',
     },
     errorText: {
-        color: 'red',
+        color: '#FF6B6B', // Soft red for errors
         textAlign: 'center',
     },
 });

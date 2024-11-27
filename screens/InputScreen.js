@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, Image, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Alert, Image, TouchableOpacity, ScrollView } from 'react-native';
 import { getDatabase, ref, set } from 'firebase/database';
 import { getAuth } from 'firebase/auth';
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -21,7 +21,6 @@ export default function InputScreen({ navigation }) {
     const [woundImage, setWoundImage] = useState(null);
 
     const resetForm = () => {
-        // Reset all form fields to their initial values
         setPain(0);
         setFatigue(0);
         setMood(0);
@@ -51,31 +50,26 @@ export default function InputScreen({ navigation }) {
     const validateInputs = () => {
         let errors = [];
 
-        // Temperature validation
         const temp = parseFloat(temperature.replace(',', '.'));
         if (temperature && (isNaN(temp) || temp < 35 || temp > 42)) {
             errors.push('Temperature should be between 35°C and 42°C');
         }
 
-        // Heart rate validation
         const hr = parseInt(heartRate);
         if (heartRate && (isNaN(hr) || hr < 40 || hr > 200)) {
             errors.push('Heart rate should be between 40 and 200 bpm');
         }
 
-        // Weight validation
         const w = parseFloat(weight);
         if (weight && (isNaN(w) || w < 20 || w > 300)) {
             errors.push('Weight should be between 20 and 300 kg');
         }
 
-        // Oxygen saturation validation
         const os = parseInt(oxygenSaturation);
         if (oxygenSaturation && (isNaN(os) || os < 50 || os > 100)) {
             errors.push('Oxygen saturation should be between 50% and 100%');
         }
 
-        // Blood pressure validation
         const sys = parseInt(systolic);
         const dia = parseInt(diastolic);
         if (systolic && (isNaN(sys) || sys < 70 || sys > 250)) {
@@ -224,7 +218,12 @@ export default function InputScreen({ navigation }) {
                 />
 
                 <View style={styles.imagePicker}>
-                    <Button title="Pick a Wound Image" onPress={pickImage} />
+                    <TouchableOpacity
+                        style={styles.saveButton}
+                        onPress={pickImage}
+                    >
+                        <Text style={styles.saveButtonText}>Pick a Wound Image</Text>
+                    </TouchableOpacity>
                     {woundImage && (
                         <Image
                             source={{ uri: woundImage }}
@@ -275,7 +274,12 @@ export default function InputScreen({ navigation }) {
                 />
             </View>
 
-            <Button title="Save Vitals" onPress={handleSaveVitals} />
+            <TouchableOpacity
+                style={styles.saveButton}
+                onPress={handleSaveVitals}
+            >
+                <Text style={styles.saveButtonText}>Save Vitals</Text>
+            </TouchableOpacity>
         </ScrollView>
     );
 }
@@ -284,7 +288,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#e6f2ff', // Light blue background
     },
     sectionTitle: {
         fontSize: 20,
@@ -318,29 +322,30 @@ const styles = StyleSheet.create({
     },
     imagePicker: {
         borderWidth: 1,
-        borderColor: '#ddd',
+        borderColor: '#2196F3', // Blue border for image picker
         borderRadius: 8,
         padding: 20,
         alignItems: 'center',
-        backgroundColor: '#fff',
+        backgroundColor: '#f0f8ff', // Very light blue background
     },
     imagePreview: {
         width: 200,
         height: 150,
         resizeMode: 'contain',
+        marginTop: 10,
     },
     saveButton: {
-        backgroundColor: '#4CAF50',
+        backgroundColor: '#2196F3', // Vibrant blue button
         padding: 15,
         borderRadius: 8,
         alignItems: 'center',
-        marginVertical: 20,
+        marginVertical: 10,
     },
     saveButtonText: {
         color: '#fff',
         fontSize: 16,
         fontWeight: 'bold',
-    },
+    }
 });
 
 

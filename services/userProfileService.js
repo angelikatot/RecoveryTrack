@@ -1,6 +1,7 @@
 import { ref, set, get } from 'firebase/database';
 import { database, auth } from './firebaseConfig';
 
+// Save user profile
 export const saveUserProfile = async (profileData) => {
     try {
         const user = auth.currentUser;
@@ -20,12 +21,13 @@ export const saveUserProfile = async (profileData) => {
         console.error('Detailed save error:', {
             message: error.message,
             code: error.code,
-            stack: error.stack
+            stack: error.stack,
         });
         throw error;
     }
 };
 
+// Get user profile
 export const getUserProfile = async () => {
     try {
         const user = auth.currentUser;
@@ -50,7 +52,7 @@ export const getUserProfile = async () => {
         console.error('Detailed fetch error:', {
             message: error.message,
             code: error.code,
-            stack: error.stack
+            stack: error.stack,
         });
         throw error;
     }
