@@ -1,4 +1,3 @@
-// HistoryScreen.js
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useHistoryData } from '../components/DataFetching';
@@ -10,15 +9,23 @@ export default function HistoryScreen() {
     const [selectedVital, setSelectedVital] = useState(null);
 
     const vitalCharts = [
-        'temperature', 'bloodPressure', // replaces 'systolic' and 'diastolic'
-        'heartRate', 'weight', 'oxygenSaturation'
+        'temperature', 'bloodPressure',
+        'heartRate', 'weight', 'oxygenSaturation',
+        'pain', 'mood', 'fatigue'
     ];
+
     const renderAccordionSection = (vital) => {
-        // Special handling for blood pressure
-        const hasBPData = vital === 'bloodPressure'
-            ? history.some(day =>
-                day.vitals.systolic !== null || day.vitals.diastolic !== null)
-            : history.some(day => day.vitals[vital] !== null);
+        // Determine if vital is a symptom or a regular vital sign
+        const isSymptom = ['pain', 'mood', 'fatigue'].includes(vital);
+
+        // Check if there's data for the specific vital/symptom
+        const hasData = history.some(day =>
+            isSymptom
+                ? day.symptoms[vital] !== null
+                : (vital === 'bloodPressure'
+                    ? day.vitals.systolic !== null || day.vitals.diastolic !== null
+                    : day.vitals[vital] !== null)
+        );
 
         const getBPValue = (record) => {
             const systolic = record.vitals.systolic;
@@ -55,12 +62,16 @@ export default function HistoryScreen() {
                                     </Text>
                                     {vital === 'bloodPressure' ? (
                                         <Text style={styles.medianValue}>
-                                            Daily Median: {day.vitals.systolic?.toFixed(0) || '-'}/
+                                            Daily average: {day.vitals.systolic?.toFixed(0) || '-'}/
                                             {day.vitals.diastolic?.toFixed(0) || '-'} mmHg
                                         </Text>
                                     ) : (
                                         <Text style={styles.medianValue}>
-                                            Daily Median: {day.vitals[vital]?.toFixed(1) || 'No data'}
+                                            Daily average: {
+                                                isSymptom
+                                                    ? day.symptoms[vital]?.toFixed(1) || 'No data'
+                                                    : day.vitals[vital]?.toFixed(1) || 'No data'
+                                            }
                                         </Text>
                                     )}
                                     {day.records.map((record, index) => (
@@ -71,7 +82,10 @@ export default function HistoryScreen() {
                                             <Text style={styles.recordValue}>
                                                 {vital === 'bloodPressure'
                                                     ? `BP: ${getBPValue(record)}`
-                                                    : `Value: ${record.vitals[vital]}`}
+                                                    : `Value: ${isSymptom
+                                                        ? record.symptoms[vital]
+                                                        : record.vitals[vital]
+                                                    }`}
                                             </Text>
                                         </View>
                                     ))}

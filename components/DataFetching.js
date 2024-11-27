@@ -8,15 +8,12 @@ export const useHistoryData = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const calculateMedian = (numbers) => {
+    const calculateMean = (numbers) => {
         if (!numbers || numbers.length === 0) return null;
-        const sorted = numbers.filter(n => n !== null && !isNaN(n)).sort((a, b) => a - b);
-        if (sorted.length === 0) return null;
-        const middle = Math.floor(sorted.length / 2);
-        if (sorted.length % 2 === 0) {
-            return (sorted[middle - 1] + sorted[middle]) / 2;
-        }
-        return sorted[middle];
+        const validNumbers = numbers.filter(n => n !== null && !isNaN(n));
+        if (validNumbers.length === 0) return null;
+        const sum = validNumbers.reduce((acc, curr) => acc + curr, 0);
+        return sum / validNumbers.length;
     };
 
     const processDataForLastSevenDays = (rawData) => {
@@ -33,21 +30,30 @@ export const useHistoryData = () => {
             return acc;
         }, {});
 
-        // Calculate daily medians for each vital
-        const dailyMedians = Object.entries(groupedByDate)
+        // Calculate daily means for each vital
+        const dailyMeans = Object.entries(groupedByDate)
             .map(([date, records]) => {
                 const vitalsMedians = {
-                    temperature: calculateMedian(records.map(r => r.vitals.temperature)),
-                    systolic: calculateMedian(records.map(r => r.vitals.systolic)),
-                    diastolic: calculateMedian(records.map(r => r.vitals.diastolic)),
-                    heartRate: calculateMedian(records.map(r => r.vitals.heartRate)),
-                    oxygenSaturation: calculateMedian(records.map(r => r.vitals.oxygenSaturation)),
-                    weight: calculateMedian(records.map(r => r.vitals.weight))
+                    temperature: calculateMean(records.map(r => r.vitals.temperature)),
+                    systolic: calculateMean(records.map(r => r.vitals.systolic)),
+                    diastolic: calculateMean(records.map(r => r.vitals.diastolic)),
+                    heartRate: calculateMean(records.map(r => r.vitals.heartRate)),
+                    oxygenSaturation: calculateMean(records.map(r => r.vitals.oxygenSaturation)),
+                    weight: calculateMean(records.map(r => r.vitals.weight)),
+
+                    pain: calculateMean(records.map(r => r.symptoms.pain)),
+                    mood: calculateMean(records.map(r => r.symptoms.mood)),
+                    fatigue: calculateMean(records.map(r => r.symptoms.fatigue))
                 };
 
                 return {
                     date,
                     vitals: vitalsMedians,
+                    symptoms: {
+                        pain: calculateMean(records.map(r => r.symptoms.pain)),
+                        mood: calculateMean(records.map(r => r.symptoms.mood)),
+                        fatigue: calculateMean(records.map(r => r.symptoms.fatigue))
+                    },
                     records: records.map(r => ({
                         ...r,
                         formattedTime: new Date(r.date).toLocaleTimeString([], {
@@ -61,7 +67,7 @@ export const useHistoryData = () => {
             .sort((a, b) => new Date(a.date) - new Date(b.date))
             .slice(-7);
 
-        return dailyMedians;
+        return dailyMeans;
     };
 
     // New function to get vitals by date

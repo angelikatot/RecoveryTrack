@@ -46,7 +46,24 @@ const HistoryChart = ({ data, selectedVital = null }) => {
                 accessor: item => item.vitals?.oxygenSaturation,
                 color: (opacity = 1) => `rgba(128, 0, 128, ${opacity})`,
                 label: 'Oxygen Saturation (%)'
+            },
+
+            pain: {
+                accessor: item => item.symptoms?.pain,
+                color: (opacity = 1) => `rgba(255, 0, 0, ${opacity})`,
+                label: 'Pain Level'
+            },
+            mood: {
+                accessor: item => item.symptoms?.mood,
+                color: (opacity = 1) => `rgba(0, 255, 0, ${opacity})`,
+                label: 'Mood Level'
+            },
+            fatigue: {
+                accessor: item => item.symptoms?.fatigue,
+                color: (opacity = 1) => `rgba(0, 0, 255, ${opacity})`,
+                label: 'Fatigue Level'
             }
+
         };
 
         if (selectedVital === 'bloodPressure') {
