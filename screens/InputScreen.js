@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        backgroundColor: '#e6f2ff', // Light blue background
+        backgroundColor: '#e6f2ff',
     },
     sectionTitle: {
         fontSize: 20,
@@ -322,11 +322,11 @@ const styles = StyleSheet.create({
     },
     imagePicker: {
         borderWidth: 1,
-        borderColor: '#2196F3', // Blue border for image picker
+        borderColor: '#2196F3',
         borderRadius: 8,
         padding: 20,
         alignItems: 'center',
-        backgroundColor: '#f0f8ff', // Very light blue background
+        backgroundColor: '#f0f8ff',
     },
     imagePreview: {
         width: 200,
@@ -335,7 +335,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     saveButton: {
-        backgroundColor: '#2196F3', // Vibrant blue button
+        backgroundColor: '#2196F3',
         padding: 15,
         borderRadius: 8,
         alignItems: 'center',

@@ -8,16 +8,16 @@ export default function HistoryScreen() {
     const [expanded, setExpanded] = useState(null);
     const [selectedVital, setSelectedVital] = useState(null);
 
-    // Pastel color palette for different vitals
+    // vitaalien värit
     const vitalColors = {
-        temperature: '#A5D8FF',      // Soft Pastel Blue
-        bloodPressure: '#B0C4DE',    // Light Steel Blue (pastel)
-        heartRate: '#E6C3FF',        // Soft Pastel Purple
-        weight: '#D8BFD8',           // Thistle (pastel purple)
-        oxygenSaturation: '#B0E0E6', // Powder Blue (pastel cyan)
-        pain: '#FFB3BA',             // Pastel Pink
-        mood: '#C1FFC1',             // Pastel Green
-        fatigue: '#FFE4B5'           // Moccasin (soft pastel orange)
+        temperature: '#A5D8FF',
+        bloodPressure: '#B0C4DE',
+        heartRate: '#E6C3FF',
+        weight: '#D8BFD8',
+        oxygenSaturation: '#B0E0E6',
+        pain: '#FFB3BA',
+        mood: '#C1FFC1',
+        fatigue: '#FFE4B5'
     };
 
     const vitalCharts = [
@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        backgroundColor: '#F0F4F8', // Softer, more muted light blue background
+        backgroundColor: '#F0F4F8',
     },
     centerContainer: {
         flex: 1,
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     accordionHeaderText: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#333', // Darker text for better readability on pastel backgrounds
+        color: '#333',
     },
     accordionContent: {
         padding: 10,
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
         color: '#666',
     },
     errorText: {
-        color: '#FF6B6B', // Soft red for errors
+        color: '#FF6B6B',
         textAlign: 'center',
     },
 });

@@ -9,7 +9,7 @@ import {
     ImageBackground,
 } from 'react-native';
 import { useFonts } from 'expo-font';
-import { signUp, signIn } from '../services/authService'; //// firebase authentication 
+import { signUp, signIn } from '../services/authService'; // firebase authentication 
 
 
 //management for form inputs and errors
@@ -58,7 +58,7 @@ const AuthScreen = ({ navigation }) => {
             resizeMode="cover"
         >
 
-            {/* Main container  */}
+
             <View style={styles.container}>
 
                 {/* Authentication form container */}

@@ -15,9 +15,9 @@ export default function CalendarScreen() {
                 const date = record.date.split('T')[0]; // Extract date in 'YYYY-MM-DD' format
                 acc[date] = {
                     marked: true,
-                    dotColor: '#6FA6D6', // A bit more defined pastel blue
+                    dotColor: '#6FA6D6',
                     selected: false
-                }; // Mark dates with a dot
+                };
                 return acc;
             }, {});
             setMarkedDates(marked); // Update the markedDates state
@@ -63,15 +63,15 @@ export default function CalendarScreen() {
                     markingType={'simple'}
                     style={styles.calendar}
                     theme={{
-                        backgroundColor: '#FFFFFF', // White background for calendar
+                        backgroundColor: '#FFFFFF',
                         calendarBackground: '#FFFFFF',
-                        textSectionTitleColor: '#4A90E2', // Soft blue for headers
-                        selectedDayBackgroundColor: '#A5D8FF', // Soft blue for selected day
+                        textSectionTitleColor: '#4A90E2',
+                        selectedDayBackgroundColor: '#A5D8FF',
                         selectedDayTextColor: '#FFFFFF',
-                        todayTextColor: '#4A90E2', // Accent blue for today
-                        dayTextColor: '#2d4150', // Dark gray for day text
-                        textDisabledColor: '#d9e1e8', // Light gray for disabled days
-                        dotColor: '#6FA6D6', // Matching dot color
+                        todayTextColor: '#4A90E2',
+                        dayTextColor: '#2d4150',
+                        textDisabledColor: '#d9e1e8',
+                        dotColor: '#6FA6D6',
                     }}
                     renderHeader={(date) => (
                         <View style={styles.calendarHeader}>
@@ -97,7 +97,7 @@ const { width } = Dimensions.get('window');
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F0F4F8', // Soft background
+        backgroundColor: '#F0F4F8',
         paddingTop: 40,
     },
     headerText: {

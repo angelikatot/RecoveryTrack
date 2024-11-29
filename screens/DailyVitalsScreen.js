@@ -106,7 +106,7 @@ const { width } = Dimensions.get('window');
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F0F4F8', // Soft background from previous screens
+        backgroundColor: '#F0F4F8',
     },
     scrollContentContainer: {
         paddingVertical: 40,

@@ -1,5 +1,5 @@
 // HistoryChart kaavio näyttää vitaalit (mm. lämpötila) kaavioina. toimii historyscreenin ja datafetchinging kanssa yhteistyössä
-// HistoryChart.js
+
 import React from 'react';
 import { LineChart } from 'react-native-chart-kit';
 import { Dimensions, View, Text, StyleSheet } from 'react-native';
@@ -211,4 +211,5 @@ const styles = StyleSheet.create({
 });
 
 export default HistoryChart;
+
 //https://github.com/indiespirit/react-native-chart-kit

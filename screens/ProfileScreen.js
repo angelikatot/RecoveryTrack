@@ -28,7 +28,7 @@ const ProfileScreen = ({ navigation }) => {
         // Initial fetch
         fetchUserProfile();
 
-        // Cleanup listener
+
         return unsubscribe;
     }, [navigation]);
 
