@@ -3,6 +3,7 @@ RecoveryTrack 📱
 RecoveryTrack is a React Native mobile application designed to assist patients in monitoring their recovery after hospital discharge. The app features customizable health tracking, data visualization, and location-based services for finding nearby healthcare centers.
 
 🚀 Features
+
 Core Features:
 Daily Health Tracking:
 
